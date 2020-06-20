@@ -7,10 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import com.reffo.osreffo.domain.ValidationGroups;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,7 +23,6 @@ public class Cliente {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY )
-	@NotNull(groups = ValidationGroups.ClienteId.class)
 	private Long id;
 	@Size(max = 60)
 	@NotBlank

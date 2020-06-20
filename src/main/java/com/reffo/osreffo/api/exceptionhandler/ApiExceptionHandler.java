@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.reffo.osreffo.api.exceptionhandler.Problema.Campo;
 import com.reffo.osreffo.domain.exception.DominioException;
+import com.reffo.osreffo.domain.exception.EntidadeNaoEncontradaException;
 
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
@@ -31,6 +32,20 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleDominio( DominioException ex, WebRequest request) {
 		
 		 HttpStatus status = HttpStatus.BAD_REQUEST;
+		 
+		 Problema p = new Problema();
+		 p.setStatus(status.value());
+		 p.setDataHora(LocalDateTime.now());
+		 p.setMensagem(ex.getMessage());
+		 
+		 return handleExceptionInternal(ex, p, new HttpHeaders(), status, request);
+		
+	}
+	
+	@ExceptionHandler(EntidadeNaoEncontradaException.class)
+	public ResponseEntity<Object> handleEntidadeNaoEnconrada( DominioException ex, WebRequest request) {
+		
+		 HttpStatus status = HttpStatus.NOT_FOUND;
 		 
 		 Problema p = new Problema();
 		 p.setStatus(status.value());

@@ -1,8 +1,9 @@
 package com.reffo.osreffo.domain.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,49 +12,37 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.ConvertGroup;
-import javax.validation.groups.Default;
+import javax.persistence.OneToMany;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.reffo.osreffo.domain.ValidationGroups;
+import com.reffo.osreffo.domain.exception.DominioException;
 import com.reffo.osreffo.domain.model.enums.SituacaoOrdemServico;
 
 import lombok.EqualsAndHashCode;
 
 @Entity
 @EqualsAndHashCode(of = { "id" })
-public class OrdemServico {	
-
+public class OrdemServico {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
-	@ManyToOne 
-	@Valid
-	@ConvertGroup(from = Default.class, to = ValidationGroups.ClienteId.class)
+	@ManyToOne
 	private Cliente cliente;
 
-	@NotBlank	
-	private String descricao;	
-	
-	@NotNull
-	private BigDecimal preco;	
+	private String descricao;
 
-	@JsonProperty(access = Access.READ_ONLY)
+	private BigDecimal preco;
+
 	@Enumerated(EnumType.STRING)
 	private SituacaoOrdemServico situacao;
-	
-	@JsonProperty(access = Access.READ_ONLY)
-	private OffsetDateTime dataAbertura;	
 
-	@JsonProperty(access = Access.READ_ONLY)
+	private OffsetDateTime dataAbertura;
+
 	private OffsetDateTime dataFinalizacao;
 	
+	@OneToMany(mappedBy = "ordemServico")
+	private List<Comentario> comentarios = new ArrayList<>();
+
 	public Long getId() {
 		return id;
 	}
@@ -108,6 +97,27 @@ public class OrdemServico {
 
 	public void setDataFinalizacao(OffsetDateTime dataFinalizacao) {
 		this.dataFinalizacao = dataFinalizacao;
+	}
+
+	public List<Comentario> getComentarios() {
+		return comentarios;
+	}
+
+	public void setComentarios(List<Comentario> comentarios) {
+		this.comentarios = comentarios;
+	}
+	
+	
+	private boolean naoPodeSerFinalizada() {
+		return !SituacaoOrdemServico.ABERTA.equals(getSituacao());
+	}
+	
+	public void finalizar() {
+		if(naoPodeSerFinalizada()) {
+			throw new DominioException("Ordem de serviço não pode ser finalizada");
+		}
+		setSituacao(SituacaoOrdemServico.FINALIZADA);
+		setDataFinalizacao(OffsetDateTime.now());
 	}
 
 }
